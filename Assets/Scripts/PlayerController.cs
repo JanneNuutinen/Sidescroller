@@ -7,16 +7,14 @@ public class PlayerController : MonoBehaviour
     //For this gameobject's rigidbody component used later in update()
     private Rigidbody rb = null;
 
+    private Animator playerAnim;
+
     public float JumpForce = 7.0f;
 
     //Boolean for tracking if the player is on ground
     public bool IsOnGround = true;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        //The other collider has to be the ground
-        IsOnGround = true;
-    }
+    public bool gameOver = false;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +24,8 @@ public class PlayerController : MonoBehaviour
         Debug.Log(Physics.gravity);
 
         rb = GetComponent<Rigidbody>();
+
+        playerAnim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -38,6 +38,22 @@ public class PlayerController : MonoBehaviour
 
             //We are not on ground anymore
             IsOnGround = false;
+
+            playerAnim.SetTrigger("Jump_trig");
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Ground"))
+        {
+            IsOnGround = true;
+        }
+        else if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            Debug.Log("Game Over");
+
+            gameOver = true;
         }
     }
 }
