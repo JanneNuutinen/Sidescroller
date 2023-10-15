@@ -9,6 +9,14 @@ public class PlayerController : MonoBehaviour
 
     private Animator playerAnim;
 
+    private AudioSource playerAudio;
+
+    public ParticleSystem explosionParticle;
+    public ParticleSystem dirtParticle;
+
+    public AudioClip jumpSound;
+    public AudioClip crashSound;
+
     public float JumpForce = 7.0f;
 
     //Boolean for tracking if the player is on ground
@@ -26,12 +34,14 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
 
         playerAnim = GetComponent<Animator>();
+
+        playerAudio = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space) && IsOnGround)
+        if(Input.GetKeyDown(KeyCode.Space) && IsOnGround && !gameOver)
         {
             //Add an impulse force upwards
             rb.AddForce(Vector3.up*JumpForce,ForceMode.Impulse);
@@ -40,6 +50,10 @@ public class PlayerController : MonoBehaviour
             IsOnGround = false;
 
             playerAnim.SetTrigger("Jump_trig");
+
+            dirtParticle.Stop();
+
+            playerAudio.PlayOneShot(jumpSound, 1.0f);
         }
     }
 
@@ -48,12 +62,22 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.CompareTag("Ground"))
         {
             IsOnGround = true;
+            dirtParticle.Play();
         }
         else if (collision.gameObject.CompareTag("Obstacle"))
         {
-            Debug.Log("Game Over");
+            Debug.Log ("Game Over");
 
             gameOver = true;
+
+            playerAnim.SetBool("Death_b", true);
+            playerAnim.SetInteger("DeathType_int", 1);
+
+            explosionParticle.Play();
+            dirtParticle.Stop();
+            playerAudio.PlayOneShot(crashSound, 1.0f);
+
+            //Time.timeScale = 0
         }
     }
 }
